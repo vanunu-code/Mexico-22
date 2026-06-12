@@ -204,14 +204,14 @@ function generatePDF(sigs) {
 }
 
 
-const OG_IMAGE_URL = "https://i.imgur.com/TaVjlpK.jpeg";
+const OG_IMAGE_URL = "/yard-3.jpg";
 
 function OGPreview() {
   return (
     <div style={{ margin: "0 0 16px", borderRadius: "12px", overflow: "hidden", border: "1.5px solid #dde1eb", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", background: "#fff" }}>
       <img src={OG_IMAGE_URL} alt="אסיפת דיירים מכסיקו 22" style={{ width: "100%", display: "block", maxHeight: "240px", objectFit: "cover" }} />
       <div style={{ padding: "10px 14px 12px", borderTop: "1px solid #eee", background: "#1a2540" }}>
-        <div style={{ fontSize: "11px", color: "#8fa8d0", marginBottom: "3px", letterSpacing: "0.5px" }}>claude.ai</div>
+        <div style={{ fontSize: "11px", color: "#8fa8d0", marginBottom: "3px", letterSpacing: "0.5px" }}>mexico-22.vercel.app</div>
         <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff", marginBottom: "3px" }}>אסיפת דיירים — מכסיקו 22 ירושלים</div>
         <div style={{ fontSize: "12px", color: "#a8b8d0", lineHeight: 1.5 }}>דרישה לכינוס אסיפה כללית שלא מן המניין · חתימה דיגיטלית לפי דירה</div>
       </div>
