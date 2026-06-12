@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { supabase, SIGNATURES_TABLE } from "./supabaseClient.js";
 
 const NUM_APARTMENTS = 32;
-const STORAGE_KEY = "mexico22-signatures";
 
 const BUILDING_ADDRESS = "מכסיקו 22, ירושלים";
 const DATE = new Date().toLocaleDateString("he-IL");
@@ -10,6 +10,18 @@ const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומו�
 const emptySignatures = Array.from({ length: NUM_APARTMENTS }, (_, i) => ({
   apt: i + 1, name: "", phone: "", signed: false, signedAt: null, drawing: null,
 }));
+
+// ממיר שורה ממסד הנתונים (snake_case) לאובייקט שהאפליקציה משתמשת בו
+function rowToSig(row) {
+  return {
+    apt: row.apt,
+    name: row.name || "",
+    phone: row.phone || "",
+    signed: !!row.signed,
+    signedAt: row.signed_at || null,
+    drawing: row.drawing || null,
+  };
+}
 
 function SignaturePad({ onSave, onClear }) {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -183,53 +195,39 @@ export default function App() {
   const [view, setView] = useState("form");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dbError, setDbError] = useState(null);
 
-  // Load from persistent storage on mount
-  useEffect(() => {
-    async function load() {
-      try {
-        const result = await window.storage.get(STORAGE_KEY, true);
-        if (result && result.value) {
-          const stored = JSON.parse(result.value);
-          // Merge stored signed sigs with empty template (preserves all 32 apts)
-          setSigs(emptySignatures.map(empty => {
-            const found = stored.find(s => s.apt === empty.apt);
-            return found ? found : empty;
-          }));
-        }
-      } catch (e) {
-        // No stored data yet, start fresh
-      }
-      setLoading(false);
-    }
-    load();
-  }, []);
-
-  // Save to persistent storage — only signed entries, never overwrites a signed entry
-  async function persistSig(updatedSigs) {
-    setSaving(true);
+  // טוען את כל החתימות ממסד הנתונים וממזג עם תבנית 32 הדירות
+  async function loadSignatures() {
     try {
-      // Load current stored to avoid overwriting another user's signature
-      let base = emptySignatures;
-      try {
-        const result = await window.storage.get(STORAGE_KEY, true);
-        if (result && result.value) base = JSON.parse(result.value);
-      } catch (e) {}
-      // Merge: stored signed entries always win, then add new signed entries
-      const merged = emptySignatures.map(empty => {
-        const stored = base.find(s => s.apt === empty.apt);
-        const local = updatedSigs.find(s => s.apt === empty.apt);
-        if (stored && stored.signed) return stored; // never overwrite stored signed
-        if (local && local.signed) return local;    // save new local signed
-        return local || empty;
-      });
-      await window.storage.set(STORAGE_KEY, JSON.stringify(merged), true);
-      setSigs(merged);
+      const { data, error } = await supabase.from(SIGNATURES_TABLE).select("*");
+      if (error) throw error;
+      const rows = data || [];
+      setSigs(emptySignatures.map(empty => {
+        const found = rows.find(r => r.apt === empty.apt);
+        return found ? rowToSig(found) : empty;
+      }));
+      setDbError(null);
     } catch (e) {
-      console.error("שגיאה בשמירה:", e);
+      console.error("שגיאה בטעינה:", e);
+      setDbError("לא ניתן להתחבר למסד הנתונים. בדוק את הגדרות Supabase.");
     }
-    setSaving(false);
+    setLoading(false);
   }
+
+  // טעינה ראשונית + מנוי לעדכונים בזמן אמת (כל חתימה חדשה מופיעה אצל כולם מיד)
+  useEffect(() => {
+    loadSignatures();
+    const channel = supabase
+      .channel("signatures-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: SIGNATURES_TABLE },
+        () => loadSignatures()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   function updateSig(apt, field, value) {
     setSigs(prev => prev.map(s => s.apt === apt ? { ...s, [field]: value } : s));
@@ -239,11 +237,44 @@ export default function App() {
     const sig = sigs.find(s => s.apt === apt);
     if (!sig.name.trim()) return alert("יש למלא שם בעל הדירה לפני החתימה.");
     if (!sig.drawing) return alert("יש לחתום בתיבת החתימה לפני האישור.");
-    const updated = sigs.map(s =>
-      s.apt === apt ? { ...s, signed: true, signedAt: new Date().toLocaleString("he-IL") } : s
-    );
-    setExpandedApt(null);
-    await persistSig(updated);
+
+    setSaving(true);
+    try {
+      // בדיקה שהדירה לא נחתמה כבר במסד הנתונים (מונע דריסה)
+      const { data: existing } = await supabase
+        .from(SIGNATURES_TABLE)
+        .select("signed")
+        .eq("apt", apt)
+        .maybeSingle();
+
+      if (existing && existing.signed) {
+        alert("דירה זו כבר חתומה ולא ניתן לשנות אותה.");
+        await loadSignatures();
+        setExpandedApt(null);
+        setSaving(false);
+        return;
+      }
+
+      const signedAt = new Date().toLocaleString("he-IL");
+      const { error } = await supabase.from(SIGNATURES_TABLE).upsert({
+        apt,
+        name: sig.name.trim(),
+        phone: sig.phone || null,
+        signed: true,
+        signed_at: signedAt,
+        drawing: sig.drawing,
+      });
+      if (error) throw error;
+
+      setSigs(prev => prev.map(s =>
+        s.apt === apt ? { ...s, signed: true, signedAt } : s
+      ));
+      setExpandedApt(null);
+    } catch (e) {
+      console.error("שגיאה בשמירה:", e);
+      alert("אירעה שגיאה בשמירת החתימה. נסה שוב.");
+    }
+    setSaving(false);
   }
 
   const signedCount = sigs.filter(s => s.signed).length;
@@ -280,6 +311,12 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {dbError && (
+        <div style={{ background: "#fdecea", color: "#b3261e", padding: "10px 16px", fontSize: "13px", textAlign: "center", borderBottom: "1px solid #f5c6cb" }}>
+          ⚠️ {dbError}
+        </div>
+      )}
 
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: `2px solid ${colors.border}`, background: colors.card }}>
