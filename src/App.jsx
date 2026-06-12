@@ -448,6 +448,7 @@ export default function App() {
                   style={{ width: "100%", height: "82px", objectFit: "cover", borderRadius: "8px", display: "block" }} />
               ))}
             </div>
+            <div style={{ marginTop: "8px", fontSize: "11px", color: colors.muted, textAlign: "center" }}>* התמונות להמחשה בלבד</div>
           </div>
 
           {/* Storage notice */}
