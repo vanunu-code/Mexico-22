@@ -1,0 +1,60 @@
+/* ============================================================
+   רקע החצר המשופצת + באנרים בצדדים.
+   - body::before : תמונת רקע מלאה (yard-1, צילום ערב) קבועה, עם
+     שכבת כהות כדי ש"גיליון" התוכן הלבן יבלוט מעליה.
+   - .side-banner : שתי רצועות תמונה (yard-2 משמאל, yard-3 מימין)
+     שממלאות את השוליים בדסקטופ בלבד. במובייל הן מוסתרות.
+   - .sheet : גיליון התוכן הממורכז שצף מעל הרקע.
+   ============================================================ */
+
+:root { --sheet-w: 820px; }
+
+html, body { margin: 0; background: #0e1320; }
+
+/* רקע מלא — צילום הערב של החצר */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(14, 19, 32, 0.60), rgba(14, 19, 32, 0.66)),
+    url("/yard-1.jpg") center / cover no-repeat;
+  z-index: -2;
+}
+
+/* באנרים בצדדים — מופיעים רק כשיש מספיק רוחב מסביב לגיליון */
+.side-banner {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: calc((100vw - var(--sheet-w)) / 2);
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  display: none;
+  pointer-events: none;
+}
+.side-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.side-left  { left: 0;  background-image: url("/yard-2.jpg"); }
+.side-right { right: 0; background-image: url("/yard-3.jpg"); }
+
+/* הצללה עדינה בקצה שנפגש עם הגיליון, לחיבור רך */
+.side-left::after  { background: linear-gradient(to right, rgba(14,19,32,0.30), rgba(14,19,32,0.58)); }
+.side-right::after { background: linear-gradient(to left,  rgba(14,19,32,0.30), rgba(14,19,32,0.58)); }
+
+@media (min-width: 1080px) {
+  .side-banner { display: block; }
+}
+
+/* גיליון התוכן הצף */
+.sheet {
+  max-width: var(--sheet-w);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.55);
+}

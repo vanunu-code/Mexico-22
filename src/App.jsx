@@ -305,9 +305,19 @@ export default function App() {
   );
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: colors.bg, fontFamily: "'Segoe UI', Arial, sans-serif" }}>
-      {/* Header */}
-      <div style={{ background: colors.header, color: "#fff", padding: "28px 24px 20px", textAlign: "center" }}>
+    <div dir="rtl" style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
+      {/* באנרים בצדדים — תמונות החצר בשוליים (דסקטופ בלבד) */}
+      <div className="side-banner side-left" />
+      <div className="side-banner side-right" />
+
+      {/* גיליון התוכן הצף מעל רקע החצר */}
+      <div className="sheet" style={{ minHeight: "100vh", background: colors.bg }}>
+      {/* Header — hero עם צילום החצר מאחורי שכבת הכחול */}
+      <div style={{
+        backgroundImage: `linear-gradient(rgba(26,37,64,0.80), rgba(26,37,64,0.90)), url("/yard-1.jpg")`,
+        backgroundSize: "cover", backgroundPosition: "center",
+        color: "#fff", padding: "28px 24px 20px", textAlign: "center",
+      }}>
         <div style={{ fontSize: "11px", letterSpacing: "2px", color: "#8fa8d0", marginBottom: "6px" }}>מסמך דיגיטלי · {BUILDING_ADDRESS}</div>
         <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700 }}>דרישה לכינוס אסיפה כללית</h1>
         <div style={{ margin: "4px 0 0", fontSize: "13px", color: "#a8b8d0" }}>חתימה דיגיטלית לפי דירה — נשמר באופן קבוע</div>
@@ -499,6 +509,7 @@ export default function App() {
           </div>
         )}
       </div>
+      </div>{/* .sheet */}
     </div>
   );
 }
