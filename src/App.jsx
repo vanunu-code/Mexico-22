@@ -296,10 +296,24 @@ export default function App() {
   };
 
   if (loading) return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: colors.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Arial, sans-serif" }}>
-      <div style={{ textAlign: "center", color: colors.muted }}>
-        <div style={{ fontSize: "32px", marginBottom: "12px" }}>🔄</div>
-        <div style={{ fontSize: "16px" }}>טוען חתימות שמורות...</div>
+    <div dir="rtl" style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Segoe UI', Arial, sans-serif", textAlign: "center", padding: "24px",
+      backgroundImage: `linear-gradient(rgba(14,19,32,0.55), rgba(14,19,32,0.72)), url("/yard-1.jpg")`,
+      backgroundSize: "cover", backgroundPosition: "center",
+    }}>
+      <div style={{ color: "#fff", maxWidth: "440px" }}>
+        <div style={{ fontSize: "12px", letterSpacing: "3px", color: "#bcd0ee", marginBottom: "10px" }}>מסמך דיגיטלי · {BUILDING_ADDRESS}</div>
+        <h1 style={{ margin: 0, fontSize: "30px", fontWeight: 800, textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>דרישה לכינוס אסיפה כללית</h1>
+        <div style={{ margin: "10px 0 26px", fontSize: "15px", color: "#d3deef" }}>חתימה דיגיטלית לפי דירה — בית משותף מכסיקו 22</div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#cdd8ec" }}>
+          <span style={{
+            width: "18px", height: "18px", borderRadius: "50%",
+            border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff",
+            display: "inline-block", animation: "mx-spin 0.8s linear infinite",
+          }} />
+          טוען חתימות שמורות...
+        </div>
       </div>
     </div>
   );

@@ -50,6 +50,9 @@ body::before {
   .side-banner { display: block; }
 }
 
+/* ספינר מסך הפתיחה */
+@keyframes mx-spin { to { transform: rotate(360deg); } }
+
 /* גיליון התוכן הצף */
 .sheet {
   max-width: var(--sheet-w);
