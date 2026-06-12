@@ -344,9 +344,11 @@ export default function App() {
 
   return (
     <div dir="rtl" style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
-      {/* באנרים בצדדים — תמונות החצר בשוליים (דסקטופ בלבד) */}
-      <div className="side-banner side-left" />
-      <div className="side-banner side-right" />
+      {/* שכבת רקע קבועה + באנרים בצדדים (דסקטופ) */}
+      <div className="bg-fixed">
+        <div className="side-banner side-left" />
+        <div className="side-banner side-right" />
+      </div>
 
       {/* גיליון התוכן הצף מעל רקע החצר */}
       <div className="sheet" style={{ minHeight: "100vh", background: colors.bg }}>

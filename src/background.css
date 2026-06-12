@@ -1,9 +1,10 @@
 /* ============================================================
    רקע החצר המשופצת + באנרים בצדדים.
-   - body::before : תמונת רקע מלאה (yard-1) קבועה, עם שכבת כהות
-     כדי ש"גיליון" התוכן הלבן יבלוט מעליה.
-   - .side-banner : שתי רצועות תמונה (yard-2 משמאל, yard-3 מימין)
-     שממלאות את השוליים במסכים רחבים. במובייל הן מוסתרות.
+   - .bg-fixed : שכבת רקע קבועה (yard-1) שמכסה את כל המסך, ומכילה
+     את שני הבאנרים בצדדים. z-index חיובי כדי להימנע מבאגי סטאקינג
+     של z-index שלילי (שמסתתר מאחורי רקע ההורה).
+   - .side-banner : רצועות תמונה (yard-2 משמאל, yard-3 מימין) שממלאות
+     את השוליים במסכים רחבים (≥1000px). במובייל מוסתרות.
    - .sheet : גיליון התוכן הממורכז שצף מעל הרקע.
    ============================================================ */
 
@@ -11,28 +12,26 @@
 
 html, body { margin: 0; background: #0e1320; }
 
-/* רקע מלא — צילום הערב של החצר */
-body::before {
-  content: "";
+/* שכבת רקע מלאה — צילום החצר, מתחת לתוכן */
+.bg-fixed {
   position: fixed;
   inset: 0;
+  z-index: 0;
   background:
     linear-gradient(rgba(14, 19, 32, 0.55), rgba(14, 19, 32, 0.62)),
     url("/yard-1.jpg") center / cover no-repeat;
-  z-index: -2;
+  pointer-events: none;
 }
 
-/* באנרים בצדדים — מופיעים כשיש מספיק רוחב מסביב לגיליון */
+/* באנרים בצדדים — ילדים של שכבת הרקע, מופיעים במסכים רחבים */
 .side-banner {
-  position: fixed;
+  position: absolute;
   top: 0;
   bottom: 0;
   width: calc((100vw - var(--sheet-w)) / 2);
-  z-index: -1;
   background-size: cover;
   background-position: center;
   display: none;
-  pointer-events: none;
 }
 .side-banner::after {
   content: "";
@@ -42,11 +41,10 @@ body::before {
 .side-left  { left: 0;  background-image: url("/yard-2.jpg"); }
 .side-right { right: 0; background-image: url("/yard-3.jpg"); }
 
-/* הצללה עדינה בקצה שנפגש עם הגיליון, לחיבור רך — קלה כדי שהתמונה תיראה ברור */
+/* הצללה קלה בקצה שנפגש עם הגיליון, כדי שהתמונה תיראה ברור */
 .side-left::after  { background: linear-gradient(to right, rgba(14,19,32,0.05), rgba(14,19,32,0.42)); }
 .side-right::after { background: linear-gradient(to left,  rgba(14,19,32,0.05), rgba(14,19,32,0.42)); }
 
-/* מציגים את הבאנרים כבר ב-1000px (לפטופים רגילים), לא רק במסכים גדולים */
 @media (min-width: 1000px) {
   .side-banner { display: block; }
 }
@@ -54,7 +52,7 @@ body::before {
 /* ספינר מסך הפתיחה */
 @keyframes mx-spin { to { transform: rotate(360deg); } }
 
-/* גיליון התוכן הצף */
+/* גיליון התוכן הצף — מעל שכבת הרקע */
 .sheet {
   max-width: var(--sheet-w);
   margin: 0 auto;
