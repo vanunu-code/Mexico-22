@@ -4,11 +4,13 @@ import { supabase, SIGNATURES_TABLE } from "./supabaseClient.js";
 const NUM_APARTMENTS = 32;
 
 const BUILDING_ADDRESS = "מכסיקו 22, ירושלים";
-const DATE = new Date().toLocaleDateString("he-IL");
+// תאריך המסמך — קבוע. היה new Date() שגרם לתאריך "לזוז" בכל יום שהאתר נפתח;
+// למסמך דרישה רשמי התאריך חייב להיות יציב. ערוך כאן אם תאריך האסיפה משתנה.
+const DATE = "12.6.2026";
 const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומות ריקים שלא בשימוש בבניין\n4. מצלמות\n5. גינון\n6. תחזוקה וניקיון\n7. הצבעה להוספת אנשים לועד הבית";
 
 const emptySignatures = Array.from({ length: NUM_APARTMENTS }, (_, i) => ({
-  apt: i + 1, name: "", phone: "", signed: false, signedAt: null, drawing: null,
+  apt: i + 1, name: "", signed: false, signedAt: null, drawing: null,
 }));
 
 // ממיר שורה ממסד הנתונים (snake_case) לאובייקט שהאפליקציה משתמשת בו
@@ -16,7 +18,6 @@ function rowToSig(row) {
   return {
     apt: row.apt,
     name: row.name || "",
-    phone: row.phone || "",
     signed: !!row.signed,
     signedAt: row.signed_at || null,
     drawing: row.drawing || null,
@@ -114,7 +115,6 @@ function generatePDF(sigs) {
     return `<tr style="border-bottom:1px solid #e0e4ef;${s.signed ? "background:#f0faf6" : "background:#fff"}">
       <td style="padding:8px 12px;font-weight:700;font-size:14px;color:#1a2540;text-align:center;width:60px">${s.apt}</td>
       <td style="padding:8px 12px;font-size:13px;color:#1a2540;">${s.name || "—"}</td>
-      <td style="padding:8px 12px;font-size:12px;color:#555;">${s.phone || "—"}</td>
       <td style="padding:8px 4px;text-align:center;width:160px;">${s.signed && sigUri ? `<img src="${sigUri}" width="150" height="50" style="display:block;margin:0 auto"/>` : '<span style="color:#ccc;font-size:12px">לא חתם</span>'}</td>
       <td style="padding:8px 12px;font-size:11px;color:#888;text-align:center">${s.signedAt || "—"}</td>
     </tr>`;
@@ -159,7 +159,7 @@ function generatePDF(sigs) {
   <div class="agenda-box"><ul>${agendaLines}</ul></div>
   <div class="section-title">רשימת חתימות — כל הדירות</div>
   <table><thead><tr>
-    <th style="text-align:center">דירה</th><th>שם בעל הדירה</th><th>טלפון</th>
+    <th style="text-align:center">דירה</th><th>שם בעל הדירה</th>
     <th style="text-align:center">חתימה</th><th style="text-align:center">תאריך ושעה</th>
   </tr></thead><tbody>${allRows}</tbody></table>
   <div class="footer">מסמך זה הופק דיגיטלית · ${BUILDING_ADDRESS} · ${DATE}</div>
@@ -259,7 +259,6 @@ export default function App() {
       const { error } = await supabase.from(SIGNATURES_TABLE).upsert({
         apt,
         name: sig.name.trim(),
-        phone: sig.phone || null,
         signed: true,
         signed_at: signedAt,
         drawing: sig.drawing,
@@ -396,17 +395,10 @@ export default function App() {
 
                 {expandedApt === s.apt && !s.signed && (
                   <div style={{ borderTop: `1px solid ${colors.border}`, padding: "14px", background: "#fbfcff" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "12px" }}>
-                      <div>
-                        <label style={{ fontSize: "12px", color: colors.muted, display: "block", marginBottom: "3px" }}>שם בעל הדירה *</label>
-                        <input value={s.name} onChange={e => updateSig(s.apt, "name", e.target.value)} placeholder="שם מלא"
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: `1px solid ${colors.border}`, fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }} />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: "12px", color: colors.muted, display: "block", marginBottom: "3px" }}>טלפון (אופציונלי)</label>
-                        <input value={s.phone} onChange={e => updateSig(s.apt, "phone", e.target.value)} placeholder="05X-XXXXXXX" type="tel"
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: `1px solid ${colors.border}`, fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }} />
-                      </div>
+                    <div style={{ marginBottom: "12px" }}>
+                      <label style={{ fontSize: "12px", color: colors.muted, display: "block", marginBottom: "3px" }}>שם בעל הדירה *</label>
+                      <input value={s.name} onChange={e => updateSig(s.apt, "name", e.target.value)} placeholder="שם מלא"
+                        style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: `1px solid ${colors.border}`, fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }} />
                     </div>
                     <div style={{ marginBottom: "12px" }}>
                       <label style={{ fontSize: "12px", color: colors.muted, display: "block", marginBottom: "4px" }}>חתימה *</label>
