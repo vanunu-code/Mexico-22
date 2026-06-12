@@ -205,6 +205,9 @@ export default function App() {
   const [expandedApt, setExpandedApt] = useState(null);
   const [view, setView] = useState("form");
   const [loading, setLoading] = useState(true);
+  // מסך הפתיחה מוצג לפחות 3 שניות כדי שיספיקו לראות את תמונת החצר,
+  // גם אם החתימות נטענו מהר יותר.
+  const [splashReady, setSplashReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dbError, setDbError] = useState(null);
 
@@ -229,6 +232,7 @@ export default function App() {
   // טעינה ראשונית + מנוי לעדכונים בזמן אמת (כל חתימה חדשה מופיעה אצל כולם מיד)
   useEffect(() => {
     loadSignatures();
+    const splashTimer = setTimeout(() => setSplashReady(true), 3000);
     const channel = supabase
       .channel("signatures-changes")
       .on(
@@ -237,7 +241,7 @@ export default function App() {
         () => loadSignatures()
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { clearTimeout(splashTimer); supabase.removeChannel(channel); };
   }, []);
 
   function updateSig(apt, field, value) {
@@ -295,7 +299,7 @@ export default function App() {
     signed: "#1a8a5a", signedBg: "#eaf7f1",
   };
 
-  if (loading) return (
+  if (loading || !splashReady) return (
     <div dir="rtl" style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: "'Segoe UI', Arial, sans-serif", textAlign: "center", padding: "24px",
