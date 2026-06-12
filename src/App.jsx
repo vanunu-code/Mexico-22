@@ -352,7 +352,7 @@ export default function App() {
       <div className="sheet" style={{ minHeight: "100vh", background: colors.bg }}>
       {/* Header — hero עם צילום החצר מאחורי שכבת הכחול */}
       <div style={{
-        backgroundImage: `linear-gradient(rgba(26,37,64,0.80), rgba(26,37,64,0.90)), url("/yard-1.jpg")`,
+        backgroundImage: `linear-gradient(rgba(26,37,64,0.78), rgba(26,37,64,0.90)), url("/yard-2.jpg")`,
         backgroundSize: "cover", backgroundPosition: "center",
         color: "#fff", padding: "28px 24px 20px", textAlign: "center",
       }}>
@@ -436,6 +436,17 @@ export default function App() {
                   <div key={i} style={{ fontWeight: i === 0 ? 600 : 400 }}>{line}</div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* גלריית החצר — נראית בכל מכשיר, גם במובייל */}
+          <div style={{ background: colors.card, borderRadius: "12px", padding: "14px", marginBottom: "16px", border: `1px solid ${colors.border}` }}>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: colors.header, marginBottom: "10px" }}>🌳 החצר המשותפת המשופצת</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+              {["/yard-1.jpg", "/yard-2.jpg", "/yard-3.jpg"].map((src, i) => (
+                <img key={i} src={src} alt={`החצר ${i + 1}`} loading="lazy"
+                  style={{ width: "100%", height: "82px", objectFit: "cover", borderRadius: "8px", display: "block" }} />
+              ))}
             </div>
           </div>
 

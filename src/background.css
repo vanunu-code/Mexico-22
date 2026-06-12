@@ -1,13 +1,13 @@
 /* ============================================================
    רקע החצר המשופצת + באנרים בצדדים.
-   - body::before : תמונת רקע מלאה (yard-1, צילום ערב) קבועה, עם
-     שכבת כהות כדי ש"גיליון" התוכן הלבן יבלוט מעליה.
+   - body::before : תמונת רקע מלאה (yard-1) קבועה, עם שכבת כהות
+     כדי ש"גיליון" התוכן הלבן יבלוט מעליה.
    - .side-banner : שתי רצועות תמונה (yard-2 משמאל, yard-3 מימין)
-     שממלאות את השוליים בדסקטופ בלבד. במובייל הן מוסתרות.
+     שממלאות את השוליים במסכים רחבים. במובייל הן מוסתרות.
    - .sheet : גיליון התוכן הממורכז שצף מעל הרקע.
    ============================================================ */
 
-:root { --sheet-w: 820px; }
+:root { --sheet-w: 760px; }
 
 html, body { margin: 0; background: #0e1320; }
 
@@ -17,12 +17,12 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(rgba(14, 19, 32, 0.60), rgba(14, 19, 32, 0.66)),
+    linear-gradient(rgba(14, 19, 32, 0.55), rgba(14, 19, 32, 0.62)),
     url("/yard-1.jpg") center / cover no-repeat;
   z-index: -2;
 }
 
-/* באנרים בצדדים — מופיעים רק כשיש מספיק רוחב מסביב לגיליון */
+/* באנרים בצדדים — מופיעים כשיש מספיק רוחב מסביב לגיליון */
 .side-banner {
   position: fixed;
   top: 0;
@@ -42,11 +42,12 @@ body::before {
 .side-left  { left: 0;  background-image: url("/yard-2.jpg"); }
 .side-right { right: 0; background-image: url("/yard-3.jpg"); }
 
-/* הצללה עדינה בקצה שנפגש עם הגיליון, לחיבור רך */
-.side-left::after  { background: linear-gradient(to right, rgba(14,19,32,0.30), rgba(14,19,32,0.58)); }
-.side-right::after { background: linear-gradient(to left,  rgba(14,19,32,0.30), rgba(14,19,32,0.58)); }
+/* הצללה עדינה בקצה שנפגש עם הגיליון, לחיבור רך — קלה כדי שהתמונה תיראה ברור */
+.side-left::after  { background: linear-gradient(to right, rgba(14,19,32,0.05), rgba(14,19,32,0.42)); }
+.side-right::after { background: linear-gradient(to left,  rgba(14,19,32,0.05), rgba(14,19,32,0.42)); }
 
-@media (min-width: 1080px) {
+/* מציגים את הבאנרים כבר ב-1000px (לפטופים רגילים), לא רק במסכים גדולים */
+@media (min-width: 1000px) {
   .side-banner { display: block; }
 }
 
