@@ -7,7 +7,15 @@ const BUILDING_ADDRESS = "מכסיקו 22, ירושלים";
 // תאריך המסמך — קבוע. היה new Date() שגרם לתאריך "לזוז" בכל יום שהאתר נפתח;
 // למסמך דרישה רשמי התאריך חייב להיות יציב. ערוך כאן אם תאריך האסיפה משתנה.
 const DATE = "12.6.2026";
-const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומות ריקים שלא בשימוש בבניין\n4. מצלמות\n5. גינון\n6. תחזוקה וניקיון\n7. הצבעה להוספת אנשים לועד הבית";
+const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומות ריקים שלא בשימוש בבניין\n4. מצלמות\n5. גינון\n6. תחזוקה וניקיון";
+
+// גוף המכתב — נוסח דרישה רשמי. כל פסקה מופרדת ב-\n. ערוך כאן בחופשיות.
+const LETTER_BODY = [
+  "לכבוד ועד הבית, בית משותף ברחוב מכסיקו 22, ירושלים,",
+  "אנו, הח\"מ, בעלי דירות בבית המשותף שבנדון, פונים אליכם בדרישה לכנס אסיפה כללית שלא מן המניין של בעלי הדירות, בהתאם לזכותנו על פי חוק המקרקעין, התשכ\"ט-1969 והתקנון המצוי שבתוספת לחוק.",
+  "האסיפה תדון בסדר היום המפורט להלן. נבקש לקבוע מועד לכינוס האסיפה בתוך זמן סביר ולהודיע על כך לכלל בעלי הדירות כנדרש.",
+  "חתימת בעל הדירה על מסמך זה מהווה הצטרפות לדרישה לכינוס האסיפה.",
+];
 
 const emptySignatures = Array.from({ length: NUM_APARTMENTS }, (_, i) => ({
   apt: i + 1, name: "", signed: false, signedAt: null, drawing: null,
@@ -110,6 +118,7 @@ function generatePDF(sigs) {
     return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgStr)))}`;
   }
   const agendaLines = AGENDA.split("\n").map(l => `<li style="margin:3px 0">${l}</li>`).join("");
+  const letterParas = LETTER_BODY.map(p => `<p style="margin:0 0 8px;font-size:13px;line-height:1.7;color:#2a3242">${p}</p>`).join("");
   const allRows = sigs.map(s => {
     const sigUri = s.signed ? sigSVGDataUri(s.drawing) : "";
     return `<tr style="border-bottom:1px solid #e0e4ef;${s.signed ? "background:#f0faf6" : "background:#fff"}">
@@ -155,6 +164,8 @@ function generatePDF(sigs) {
     <div class="stat-card" style="flex:2"><div style="font-size:13px;font-weight:700;margin-bottom:6px">${Math.round(signedSigs.length / NUM_APARTMENTS * 100)}% מהדירות חתמו</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(signedSigs.length / NUM_APARTMENTS * 100)}%"></div></div></div>
   </div>
+  <div class="section-title">נוסח הדרישה</div>
+  <div class="agenda-box">${letterParas}</div>
   <div class="section-title">סדר היום לאסיפה</div>
   <div class="agenda-box"><ul>${agendaLines}</ul></div>
   <div class="section-title">רשימת חתימות — כל הדירות</div>
@@ -344,6 +355,15 @@ export default function App() {
                 <div style={{ padding: "8px 10px", borderRadius: "6px", background: "#f4f6fb", fontSize: "14px", fontWeight: 600, color: colors.header }}>{BUILDING_ADDRESS}</div>
               </div>
             </div>
+            <div style={{ marginTop: "14px" }}>
+              <div style={{ fontSize: "12px", color: colors.muted, marginBottom: "6px" }}>נוסח הדרישה</div>
+              <div style={{ padding: "12px 14px", borderRadius: "6px", background: "#f4f6fb", fontSize: "13px", lineHeight: "1.7", color: "#2a3242", textAlign: "justify" }}>
+                {LETTER_BODY.map((p, i) => (
+                  <p key={i} style={{ margin: i === 0 ? "0 0 8px" : "8px 0 0" }}>{p}</p>
+                ))}
+              </div>
+            </div>
+
             <div style={{ marginTop: "12px" }}>
               <div style={{ fontSize: "12px", color: colors.muted, marginBottom: "6px" }}>סדר היום לאסיפה</div>
               <div style={{ padding: "10px 14px", borderRadius: "6px", background: "#f4f6fb" }}>
