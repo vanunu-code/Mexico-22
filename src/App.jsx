@@ -480,6 +480,16 @@ export default function App() {
 
                 {expandedApt === s.apt && !s.signed && (
                   <div style={{ borderTop: `1px solid ${colors.border}`, padding: "14px", background: "#fbfcff" }}>
+                    {/* באנר חצר — נראה תמיד בזמן החתימה */}
+                    <div style={{
+                      position: "relative", height: "92px", borderRadius: "8px", overflow: "hidden", marginBottom: "14px",
+                      backgroundImage: `url("/yard-3.jpg")`, backgroundSize: "cover", backgroundPosition: "center",
+                    }}>
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(rgba(14,19,32,0.15), rgba(14,19,32,0.55))" }} />
+                      <div style={{ position: "absolute", right: "12px", bottom: "9px", color: "#fff", fontWeight: 700, fontSize: "16px", textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>
+                        מכסיקו 22 · דירה {s.apt}
+                      </div>
+                    </div>
                     <div style={{ marginBottom: "12px" }}>
                       <label style={{ fontSize: "12px", color: colors.muted, display: "block", marginBottom: "3px" }}>שם בעל הדירה *</label>
                       <input value={s.name} onChange={e => updateSig(s.apt, "name", e.target.value)} placeholder="שם מלא"
