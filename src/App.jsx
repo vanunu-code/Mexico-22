@@ -174,14 +174,25 @@ function generatePDF(sigs) {
     <th style="text-align:center">חתימה</th><th style="text-align:center">תאריך ושעה</th>
   </tr></thead><tbody>${allRows}</tbody></table>
   <div class="footer">מסמך זה הופק דיגיטלית · ${BUILDING_ADDRESS} · ${DATE}</div>
-</div><script>window.onload=()=>window.print();</script></body></html>`;
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `אסיפה_כללית_מכסיקו22.html`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
+</div></body></html>`;
+
+  // הפקת PDF דרך דיאלוג ההדפסה של הדפדפן ("שמור כ-PDF"). מודפס מתוך
+  // iframe נסתר — לא נחסם ע"י חוסם חלונות קופצים, והטקסט בעברית והחתימות
+  // (SVG וקטורי) נשארים חדים, בלי צורך בספריות חיצוניות.
+  const iframe = document.createElement("iframe");
+  Object.assign(iframe.style, { position: "fixed", right: "0", bottom: "0", width: "0", height: "0", border: "0" });
+  iframe.setAttribute("aria-hidden", "true");
+  document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    const win = iframe.contentWindow;
+    const cleanup = () => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); };
+    win.addEventListener("afterprint", () => setTimeout(cleanup, 300));
+    // השהייה קצרה כדי שגופן Heebo והחתימות ייטענו לפני ההדפסה
+    setTimeout(() => { try { win.focus(); win.print(); } catch (e) { console.error("print failed", e); cleanup(); } }, 450);
+    setTimeout(cleanup, 60000); // רשת ביטחון אם afterprint לא נורה
+  };
+  iframe.srcdoc = html;
 }
 
 
@@ -485,7 +496,7 @@ export default function App() {
               fontWeight: 700, fontFamily: "inherit", marginBottom: "20px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             }}>
-              📄 הורד מסמך PDF עם כל החתימות
+              📄 הורד / הדפס מסמך PDF (שמור כ-PDF)
             </button>
 
             <div style={{ fontWeight: 700, fontSize: "13px", color: colors.header, marginBottom: "8px" }}>✅ חתמו ({sigs.filter(s => s.signed).length})</div>
