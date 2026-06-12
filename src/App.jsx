@@ -7,15 +7,16 @@ const BUILDING_ADDRESS = "מכסיקו 22, ירושלים";
 // תאריך המסמך — קבוע. היה new Date() שגרם לתאריך "לזוז" בכל יום שהאתר נפתח;
 // למסמך דרישה רשמי התאריך חייב להיות יציב. ערוך כאן אם תאריך האסיפה משתנה.
 const DATE = "12.6.2026";
-const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומות ריקים שלא בשימוש בבניין\n4. מצלמות\n5. גינון\n6. תחזוקה וניקיון";
+const AGENDA = "1. חניה בכניסה\n2. חניה מאחור\n3. מקומות ריקים שלא בשימוש בבניין\n4. מצלמות\n5. גינון\n6. תחזוקה וניקיון\n7. ליקויי בדק בית ותקלות — פשרה מול פנייה משפטית";
 
-// גוף המכתב — נוסח דרישה רשמי. כל פסקה מופרדת ב-\n. ערוך כאן בחופשיות.
-const LETTER_BODY = [
-  "לכבוד ועד הבית, בית משותף ברחוב מכסיקו 22, ירושלים,",
-  "אנו, הח\"מ, בעלי דירות בבית המשותף שבנדון, פונים אליכם בדרישה לכנס אסיפה כללית שלא מן המניין של בעלי הדירות, בהתאם לזכותנו על פי חוק המקרקעין, התשכ\"ט-1969 והתקנון המצוי שבתוספת לחוק.",
-  "האסיפה תדון בסדר היום המפורט להלן. נבקש לקבוע מועד לכינוס האסיפה בתוך זמן סביר ולהודיע על כך לכלל בעלי הדירות כנדרש.",
-  "חתימת בעל הדירה על מסמך זה מהווה הצטרפות לדרישה לכינוס האסיפה.",
-];
+// ── נוסח המכתב הרשמי (ערוך כאן בחופשיות) ──────────────────────
+const LETTER_TO = ["לכבוד", "ועד הבית", BUILDING_ADDRESS];
+const LETTER_SUBJECT = "הנדון: דרישה לכינוס אסיפה כללית שלא מן המניין";
+const LETTER_INTRO =
+  "אנו, הח\"מ, בעלי דירות בבניין ברחוב מכסיקו 22, ירושלים, מבקשים בזאת לכנס אסיפה כללית שלא מן המניין, בהתאם לחוק המקרקעין תשכ\"ט-1969 וחוקת הבית המשותף.";
+const LETTER_OUTRO =
+  "אנו פונים אליכם בדרישה לקבוע מועד לאסיפה בהקדם האפשרי, ולא יאוחר מ-21 יום מקבלת פנייה זו.";
+const LETTER_SIGNOFF = ["בכבוד רב,", "בעלי הדירות החתומים מטה"];
 
 const emptySignatures = Array.from({ length: NUM_APARTMENTS }, (_, i) => ({
   apt: i + 1, name: "", signed: false, signedAt: null, drawing: null,
@@ -117,8 +118,9 @@ function generatePDF(sigs) {
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${pathsHTML}</svg>`;
     return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgStr)))}`;
   }
-  const agendaLines = AGENDA.split("\n").map(l => `<li style="margin:3px 0">${l}</li>`).join("");
-  const letterParas = LETTER_BODY.map(p => `<p style="margin:0 0 8px;font-size:13px;line-height:1.7;color:#2a3242">${p}</p>`).join("");
+  const agendaItems = AGENDA.split("\n").map(l => `<div style="line-height:1.9">${l}</div>`).join("");
+  const letterToLines = LETTER_TO.map((l, i) => `<div style="${i === 0 ? "font-weight:600" : ""}">${l}</div>`).join("");
+  const signoffLines = LETTER_SIGNOFF.map((l, i) => `<div style="${i === 0 ? "font-weight:600" : ""}">${l}</div>`).join("");
   const allRows = sigs.map(s => {
     const sigUri = s.signed ? sigSVGDataUri(s.drawing) : "";
     return `<tr style="border-bottom:1px solid #e0e4ef;${s.signed ? "background:#f0faf6" : "background:#fff"}">
@@ -140,6 +142,7 @@ function generatePDF(sigs) {
   .meta-label{font-size:11px;color:#8a92a3;margin-bottom:3px}.meta-value{font-size:14px;font-weight:600}
   .section-title{font-size:13px;font-weight:700;margin:20px 0 8px}
   .agenda-box{background:#f8f9fb;border:1px solid #dde1eb;border-radius:8px;padding:14px 18px;margin-bottom:20px}
+  .letter-box{background:#f8f9fb;border:1px solid #dde1eb;border-radius:8px;padding:20px 22px;margin-bottom:22px;font-size:13.5px;line-height:1.8;color:#2a3242;text-align:right}
   .agenda-box ul{padding-right:18px;font-size:13px;line-height:2;color:#333}
   .stats{display:flex;gap:16px;margin-bottom:20px}.stat-card{flex:1;background:#f0f2f7;border-radius:8px;padding:14px;text-align:center}
   .stat-num{font-size:28px;font-weight:800}.stat-label{font-size:12px;color:#8a92a3;margin-top:2px}
@@ -164,10 +167,15 @@ function generatePDF(sigs) {
     <div class="stat-card" style="flex:2"><div style="font-size:13px;font-weight:700;margin-bottom:6px">${Math.round(signedSigs.length / NUM_APARTMENTS * 100)}% מהדירות חתמו</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(signedSigs.length / NUM_APARTMENTS * 100)}%"></div></div></div>
   </div>
-  <div class="section-title">נוסח הדרישה</div>
-  <div class="agenda-box">${letterParas}</div>
-  <div class="section-title">סדר היום לאסיפה</div>
-  <div class="agenda-box"><ul>${agendaLines}</ul></div>
+  <div class="letter-box">
+    <div style="margin-bottom:14px">${letterToLines}</div>
+    <div style="font-weight:700;color:#1a2540;text-decoration:underline;text-underline-offset:3px;margin-bottom:14px">${LETTER_SUBJECT}</div>
+    <p style="margin:0 0 14px;text-align:justify">${LETTER_INTRO}</p>
+    <div style="font-weight:600;margin-bottom:4px">סדר היום המוצע לאסיפה:</div>
+    <div style="margin-bottom:14px">${agendaItems}</div>
+    <p style="margin:0 0 16px;text-align:justify">${LETTER_OUTRO}</p>
+    <div>${signoffLines}</div>
+  </div>
   <div class="section-title">רשימת חתימות — כל הדירות</div>
   <table><thead><tr>
     <th style="text-align:center">דירה</th><th>שם בעל הדירה</th>
@@ -394,20 +402,37 @@ export default function App() {
                 <div style={{ padding: "8px 10px", borderRadius: "6px", background: "#f4f6fb", fontSize: "14px", fontWeight: 600, color: colors.header }}>{BUILDING_ADDRESS}</div>
               </div>
             </div>
-            <div style={{ marginTop: "14px" }}>
-              <div style={{ fontSize: "12px", color: colors.muted, marginBottom: "6px" }}>נוסח הדרישה</div>
-              <div style={{ padding: "12px 14px", borderRadius: "6px", background: "#f4f6fb", fontSize: "13px", lineHeight: "1.7", color: "#2a3242", textAlign: "justify" }}>
-                {LETTER_BODY.map((p, i) => (
-                  <p key={i} style={{ margin: i === 0 ? "0 0 8px" : "8px 0 0" }}>{p}</p>
+            <div style={{ marginTop: "14px", padding: "18px 18px 20px", borderRadius: "6px", background: "#f4f6fb", fontSize: "13.5px", lineHeight: "1.8", color: "#2a3242", textAlign: "right" }}>
+              {/* לכבוד */}
+              <div style={{ marginBottom: "14px" }}>
+                {LETTER_TO.map((line, i) => (
+                  <div key={i} style={{ fontWeight: i === 0 ? 600 : 400 }}>{line}</div>
                 ))}
               </div>
-            </div>
 
-            <div style={{ marginTop: "12px" }}>
-              <div style={{ fontSize: "12px", color: colors.muted, marginBottom: "6px" }}>סדר היום לאסיפה</div>
-              <div style={{ padding: "10px 14px", borderRadius: "6px", background: "#f4f6fb" }}>
+              {/* הנדון */}
+              <div style={{ fontWeight: 700, color: colors.header, textDecoration: "underline", textUnderlineOffset: "3px", marginBottom: "14px" }}>
+                {LETTER_SUBJECT}
+              </div>
+
+              {/* פתיחה */}
+              <p style={{ margin: "0 0 14px", textAlign: "justify" }}>{LETTER_INTRO}</p>
+
+              {/* סדר היום */}
+              <div style={{ fontWeight: 600, marginBottom: "4px" }}>סדר היום המוצע לאסיפה:</div>
+              <div style={{ paddingInlineStart: "4px", marginBottom: "14px" }}>
                 {AGENDA.split("\n").map((line, i) => (
-                  <div key={i} style={{ fontSize: "13px", lineHeight: "2", color: "#333" }}>{line}</div>
+                  <div key={i} style={{ lineHeight: "1.9" }}>{line}</div>
+                ))}
+              </div>
+
+              {/* סיום */}
+              <p style={{ margin: "0 0 16px", textAlign: "justify" }}>{LETTER_OUTRO}</p>
+
+              {/* חתימה */}
+              <div>
+                {LETTER_SIGNOFF.map((line, i) => (
+                  <div key={i} style={{ fontWeight: i === 0 ? 600 : 400 }}>{line}</div>
                 ))}
               </div>
             </div>
