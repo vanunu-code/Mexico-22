@@ -325,10 +325,11 @@ export default function App() {
       backgroundImage: `linear-gradient(rgba(14,19,32,0.55), rgba(14,19,32,0.72)), url("/yard-1.jpg")`,
       backgroundSize: "cover", backgroundPosition: "center",
     }}>
-      <div style={{ color: "#fff", maxWidth: "440px" }}>
-        <div style={{ fontSize: "12px", letterSpacing: "3px", color: "#bcd0ee", marginBottom: "10px" }}>מסמך דיגיטלי · {BUILDING_ADDRESS}</div>
-        <h1 style={{ margin: 0, fontSize: "30px", fontWeight: 800, textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>דרישה לכינוס אסיפה כללית</h1>
-        <div style={{ margin: "10px 0 26px", fontSize: "15px", color: "#d3deef" }}>חתימה דיגיטלית לפי דירה — בית משותף מכסיקו 22</div>
+      <div style={{ color: "#fff", maxWidth: "460px" }}>
+        <div style={{ fontSize: "12px", letterSpacing: "3px", color: "#bcd0ee", marginBottom: "10px" }}>מסמך דיגיטלי · ירושלים</div>
+        <h1 style={{ margin: 0, fontSize: "56px", fontWeight: 800, letterSpacing: "1px", lineHeight: 1.05, textShadow: "0 3px 22px rgba(0,0,0,0.6)" }}>מכסיקו 22</h1>
+        <div style={{ margin: "12px 0 4px", fontSize: "18px", fontWeight: 600, color: "#eef3fb", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>דרישה לכינוס אסיפה כללית</div>
+        <div style={{ margin: "0 0 26px", fontSize: "14px", color: "#cdd8ec" }}>חתימה דיגיטלית לפי דירה</div>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#cdd8ec" }}>
           <span style={{
             width: "18px", height: "18px", borderRadius: "50%",
